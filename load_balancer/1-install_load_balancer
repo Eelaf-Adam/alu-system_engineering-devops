@@ -1,20 +1,19 @@
 #!/usr/bin/env bash
-#!/usr/bin/env bash
 # Install and configure HAproxy on your lb-01 server.
 
-# Update and install HAProxy
+# 1. Install HAProxy
 apt-get -y update
 apt-get -y install haproxy
 
-# Enable HAProxy to be started by the init script
-# This ensures it starts automatically on boot or via service commands
-sed -i 's/ENABLED=0/ENABLED=1/' /etc/default/haproxy 2>/dev/null || true
+# 2. Configure the init script to allow HAProxy to start
+# (This handles the requirement: "Make sure that HAproxy can be managed via an init script")
+if [ -f /etc/default/haproxy ]; then
+    sed -i 's/ENABLED=0/ENABLED=1/' /etc/default/haproxy
+fi
 
-# Backup the original config file (good practice, though not strictly required by checker)
-cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.bak
-
-# Append the custom configuration to /etc/haproxy/haproxy.cfg
-# We use 'cat <<EOT >>' to append a block of text to the file
+# 3. Add the configuration
+# REPLACE 11.22.33.44 WITH YOUR REAL WEB-01 IP
+# REPLACE 55.66.77.88 WITH YOUR REAL WEB-02 IP
 cat <<EOT >> /etc/haproxy/haproxy.cfg
 
 frontend www-http
@@ -24,9 +23,9 @@ frontend www-http
 
 backend web-backend
     balance roundrobin
-    server web-01 [YOUR_WEB-01_IP]:80 check
-    server web-02 [YOUR_WEB-02_IP]:80 check
+    server web-01 11.22.33.44:80 check
+    server web-02 55.66.77.88:80 check
 EOT
 
-# Restart HAProxy to apply the changes
+# 4. Restart HAProxy
 service haproxy restart
