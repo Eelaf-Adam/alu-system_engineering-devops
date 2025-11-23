@@ -11,10 +11,8 @@ fi
 systemctl start nginx 
 systemctl enable nginx 
 
-#Add custome header 
-cat > /etc/nginx/conf.d/custom_header.conf << EOF 
-add_header X-Served-By \$hostname;
-EOF 
+#Add custome header
+echo "add_header X-Served-By \$hostname;" > /etc/nginx/conf.d/custom_header.conf 
 
 
 # Reload and test nginx 
