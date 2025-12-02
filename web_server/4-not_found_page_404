@@ -4,7 +4,7 @@
 sudo apt-get update
 sudo apt-get install -y nginx
 
-sudo echo "<h1>Ceci n'est pas une page</h1>" > /usr/share/nginx/html/404.html
+sudo echo "Ceci n'est pas une page" > /usr/share/nginx/html/404.html
 
 sudo scp /etc/nginx/sites-available/default  /etc/nginx/sites-available/default.bak
 
