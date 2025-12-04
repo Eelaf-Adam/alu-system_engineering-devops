@@ -1,24 +1,27 @@
 #!/usr/bin/env bash
-# bash script to install nginx web server & make the following configurations:
+# Install Nginx and configure redirect
 
 apt-get update
 apt-get install -y nginx
 
-mkdir /etc/nginx/html
+# Create web root
+mkdir -p /var/www/html
+echo "Holberton School" > /var/www/html/index.html
 
-touch /etc/nginx/html/index.html
+# Configure default site
+cat << 'EOF' > /etc/nginx/sites-available/default
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
 
-echo "Holberton School" > /etc/nginx/html/index.html
-printf %s "server {
-    listen      80 default_server;
-    listen      [::]:80 default_server;
-    root        /etc/nginx/html;
-    index       index.html index.htm;
+    root /var/www/html;
+    index index.html index.htm;
 
     location /redirect_me {
-        return 301 http://youtube.com/;
+        return 301 https://youtube.com/;
     }
 }
-" > /etc/nginx/sites-available/default
+EOF
 
-sudo service nginx restart
+# Restart service
+service nginx restart
