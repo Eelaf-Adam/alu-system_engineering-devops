@@ -3,24 +3,23 @@
 # Hahahaha I am cooked
 
 
-sudo apt-get update
 sudo apt-get install -y nginx
 sudo ufw allow 'Nginx HTTP'
 
+# Add sample page
+echo "Holberton School" | sudo tee /var/www/html/school.html
 
-sudo bash -c 'echo "Holberton School" > /var/www/html/school.html'
-
-
-sudo tee -a /etc/nginx/sites-available/default > /dev/null <<'EOF'
+# Add redirect inside server block
+sudo bash -c 'cat >> /etc/nginx/sites-available/default <<EOF
     location /redirect_me {
         return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
     }
-EOF
+EOF'
 
-
+# Test config and restart
 sudo nginx -t
-sudo service nginx restart
+sudo systemctl restart nginx
 
-
+# Print HTTP status code for redirect
 curl -s -o /dev/null -w "%{http_code}" http://localhost/redirect_me
 
