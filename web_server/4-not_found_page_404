@@ -1,13 +1,42 @@
 #!/usr/bin/env bash
-# custom 404 page
+# custom 404 page - fixed version
 
-sudo apt-get update
-sudo apt-get install -y nginx
+set -e
 
-sudo echo "Ceci n'est pas une page" > /usr/share/nginx/html/4-not_found_page_404.html
+apt-get update
+apt-get install -y nginx
 
-sudo scp /etc/nginx/sites-available/default  /etc/nginx/sites-available/default.bak
+# Ensure directory exists and create custom 404 page
+mkdir -p /usr/share/nginx/html
+echo "Ceci n'est pas une page" | sudo tee /usr/share/nginx/html/4-not_found_page_404.html > /dev/null
 
-sudo sed -i '/server_name_;/a \  error_page 404 /4-not_found_page_404.htm;\n   location = /4-not_found_page_404.htm  {\n    root /usr/share/nginx/html;\n   internal;\n   }' /etc/nginx/sites-available/default
+# Backup existing default site config
+cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
 
-sudo service nginx restart
+# Write a clear, correct default server config
+cat <<'EOF' > /etc/nginx/sites-available/default
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    root /var/www/html;
+    index index.html index.htm;
+
+    server_name _;
+
+    # Custom 404 page (internal location)
+    error_page 404 /4-not_found_page_404.html;
+    location = /4-not_found_page_404.html {
+        root /usr/share/nginx/html;
+        internal;
+    }
+
+    # Serve files; missing files produce 404 which triggers the error_page above
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+EOF
+
+# Restart Nginx
+service nginx restart
